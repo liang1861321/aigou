@@ -1,0 +1,19 @@
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:1000/eureka/
+  instance:
+    prefer-ip-address: true #使用ip注册到eureka服务列表
+server:
+  port: 1100
+spring:
+  application:
+    name: zuul-server
+zuul:
+  ignoredServices: '*'
+  routes:
+    plat:
+      path: /plat/** #平台服务的请求路径
+      serviceId: plat-service
+  prefix: /services #请求前缀
+
