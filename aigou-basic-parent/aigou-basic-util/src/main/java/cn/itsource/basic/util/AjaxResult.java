@@ -2,9 +2,9 @@ package cn.itsource.basic.util;
 
 public class AjaxResult {
 
-    private Boolean success;
+    private boolean success = true;
 
-    private String message;
+    private String message = "操作成功!";
 
     private Object restObj;
 
