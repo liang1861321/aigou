@@ -3,9 +3,16 @@ package cn.itsource.aigou.service.impl;
 import cn.itsource.aigou.domain.ProductType;
 import cn.itsource.aigou.mapper.ProductTypeMapper;
 import cn.itsource.aigou.service.IProductTypeService;
+import cn.itsource.basic.util.AjaxResult;
+import cn.itsource.common.client.RedisClient;
+import cn.itsource.common.client.StaticPageClient;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,11 +30,49 @@ import java.util.Map;
 @Service
 public class ProductTypeServiceImpl extends ServiceImpl<ProductTypeMapper, ProductType> implements IProductTypeService {
 
+    @Autowired
+    private RedisClient redisClient;
+
+    @Autowired
+    private StaticPageClient staticPageClient;
+
+    @Override
+    public void getHomePage() {
+        //第一步先生成 product.type.vm.html
+        Map<String ,Object> map = new HashMap<>();
+        String templatePath = "E:\\IdeaWorkSpace\\aigou-parent\\aigou-product-parent\\aigou-product-sercvice\\src\\main\\resources\\template\\product.type.vm";
+        String targetPath = "E:\\IdeaWorkSpace\\aigou-parent\\aigou-product-parent\\aigou-product-sercvice\\src\\main\\resources\\template\\product.type.vm.html";
+        List<ProductType> productTypes = loop();
+        map.put("model",productTypes);
+        map.put("templatePath",templatePath);
+        map.put("targetPath",targetPath);
+        staticPageClient.genStaticPage(map);
+
+        //第二步 ： 生成home.html
+        templatePath = "E:\\IdeaWorkSpace\\aigou-parent\\aigou-product-parent\\aigou-product-sercvice\\src\\main\\resources\\template\\home.vm";
+        targetPath = "E:\\IdeaWorkSpace\\aigou-web-parent\\aigou-web-home\\home.html";
+
+        Map<String,String> model = new HashMap<>();
+        model.put("staticRoot","E:\\IdeaWorkSpace\\aigou-parent\\aigou-product-parent\\aigou-product-sercvice\\src\\main\\resources\\");
+        map.put("model",model);
+        map.put("templatePath",templatePath);
+        map.put("targetPath",targetPath);
+        staticPageClient.genStaticPage(map);
+    }
+
     @Override
     public List<ProductType> loadTypeTree() {
-//        return recursive(0L);
-        return loop();
+        AjaxResult result = redisClient.get("productTypes");
+        String restObj = (String) result.getRestObj();
+        List<ProductType> productTypes = JSON.parseArray(restObj, ProductType.class);
+        if (productTypes==null || productTypes.size()<= 0){
+            productTypes = loop();
+            redisClient.set("productTypes",JSON.toJSONString(productTypes));
+        }
+        return productTypes;
     }
+
+
 
     private List<ProductType> loop() {
         List<ProductType> productTypes = baseMapper.selectList(null);
@@ -74,6 +119,8 @@ public class ProductTypeServiceImpl extends ServiceImpl<ProductTypeMapper, Produ
         }
         return parents;
     }
+
+
 
 
 }

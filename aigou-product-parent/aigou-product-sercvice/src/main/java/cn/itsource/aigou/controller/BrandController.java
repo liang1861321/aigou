@@ -4,6 +4,7 @@ import cn.itsource.aigou.service.IBrandService;
 import cn.itsource.aigou.domain.Brand;
 import cn.itsource.aigou.query.BrandQuery;
 import cn.itsource.basic.util.AjaxResult;
+import cn.itsource.basic.util.LetterUtil;
 import cn.itsource.basic.util.PageList;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -29,6 +30,8 @@ public class BrandController {
             if(brand.getId()!=null){
                 brandService.updateById(brand);
             }else{
+                String firstLetter = LetterUtil.getFirstLetter(brand.getName());
+                brand.setFirstLetter(firstLetter.toUpperCase());
                 brandService.save(brand);
             }
             return AjaxResult.me();
@@ -45,8 +48,6 @@ public class BrandController {
     */
     @RequestMapping(value="/delete/{id}",method=RequestMethod.DELETE)
     public AjaxResult delete(@PathVariable("id") Integer id){
-        System.out.println("111111111111111111111111111111111111");
-        System.out.println(id);
         try {
             brandService.removeById(id);
             return AjaxResult.me();

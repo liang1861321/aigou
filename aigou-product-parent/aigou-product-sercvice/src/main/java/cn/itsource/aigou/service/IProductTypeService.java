@@ -19,4 +19,5 @@ public interface IProductTypeService extends IService<ProductType> {
     public List<ProductType> loadTypeTree();
 
 
+    public void getHomePage();
 }
