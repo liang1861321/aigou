@@ -89,7 +89,12 @@ public class ProductTypeServiceImpl extends ServiceImpl<ProductTypeMapper, Produ
                 list.add(productType);
             }else{
                 ProductType parent = map.get(productType.getPid());
-                parent.getChildren().add(productType);
+                List<ProductType> children = parent.getChildren();
+                if(children==null){
+                    children = new ArrayList<>();
+                }
+                children.add(productType);
+                parent.setChildren(children);
             }
         }
         return list;
@@ -119,6 +124,8 @@ public class ProductTypeServiceImpl extends ServiceImpl<ProductTypeMapper, Produ
         }
         return parents;
     }
+
+
 
 
 

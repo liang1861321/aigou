@@ -13,6 +13,6 @@ spring:
       name: application-common
       profile: dev
 server:
-  max-http-header-size: 1024000
+  max-http-header-size: 10240000
 
 
